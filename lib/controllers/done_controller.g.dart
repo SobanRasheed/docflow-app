@@ -15,15 +15,15 @@ final doneControllerProvider = DoneControllerProvider._();
 final class DoneControllerProvider
     extends $AsyncNotifierProvider<DoneController, DoneState> {
   DoneControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'doneControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'doneControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$doneControllerHash();
@@ -41,14 +41,11 @@ abstract class _$DoneController extends $AsyncNotifier<DoneState> {
   @override
   void runBuild() {
     final ref = this.ref as $Ref<AsyncValue<DoneState>, DoneState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<DoneState>, DoneState>,
-              AsyncValue<DoneState>,
-              Object?,
-              Object?
-            >;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<DoneState>, DoneState>,
+        AsyncValue<DoneState>,
+        Object?,
+        Object?>;
     element.handleCreate(ref, build);
   }
 }

@@ -59,7 +59,7 @@ class UploadController extends AsyncNotifier<UploadState> {
     }
 
     try {
-      FilePickerResult? result = await FilePicker.pickFiles(
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: tool.supportsMultiple,
         type: FileType.custom,
         allowedExtensions: tool.acceptedInputs,

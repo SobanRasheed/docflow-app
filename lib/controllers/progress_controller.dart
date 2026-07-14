@@ -87,7 +87,8 @@ class ProgressController extends AsyncNotifier<ConversionState> {
     } on DocFlowException catch (e) {
       state = AsyncData(ConversionState(error: e.message, tool: tool));
     } catch (e) {
-      state = AsyncData(ConversionState(error: 'An unexpected error occurred.', tool: tool));
+      // Updated to show the actual error message for better debugging
+      state = AsyncData(ConversionState(error: e.toString(), tool: tool));
     }
   }
 

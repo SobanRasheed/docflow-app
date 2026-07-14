@@ -1,5 +1,5 @@
 sealed class DocFlowException implements Exception {
-  const DocFlowException(this.message, {this.cause, this.stackTrace});
+  const DocFlowException([this.message = 'An unexpected error occurred.', this.cause, this.stackTrace]);
   final String message;
   final Object? cause;
   final StackTrace? stackTrace;

@@ -55,7 +55,9 @@ class ILovePdfService {
     final jwt = await _authenticate(cancelToken: cancelToken);
     _jwt = jwt;
 
-    final task = await _startTask(tool.toolCode, cancelToken: cancelToken);
+    final startResponse = await _startTask(tool.toolCode, cancelToken: cancelToken);
+    final task = startResponse.task;
+    final server = startResponse.server;
 
     final files = <File>[input, if (extras != null) ...extras];
     final serverFiles = <_ServerFile>[];
@@ -64,6 +66,7 @@ class ILovePdfService {
       final baseProgress = i / files.length;
       final span = 1 / files.length;
       final serverName = await _uploadFile(
+        server: server,
         task: task,
         file: f,
         cancelToken: cancelToken,
@@ -75,6 +78,7 @@ class ILovePdfService {
     }
 
     await _process(
+      server: server,
       task: task,
       tool: tool,
       files: serverFiles,
@@ -83,6 +87,7 @@ class ILovePdfService {
     );
 
     final bytes = await _download(
+      server: server,
       task: task,
       cancelToken: cancelToken,
       onProgress: (p) => onProgress?.call((0.6 + p * 0.4).clamp(0.6, 1.0)),
@@ -93,7 +98,7 @@ class ILovePdfService {
 
   void _validateInput(File file, ToolType tool) {
     if (!file.existsSync()) {
-      throw FileTooLargeException(0, ApiConfig.maxFileSizeMb.toInt());
+      throw FileTooLargeException(0.0, ApiConfig.maxFileSizeMb);
     }
     final stat = file.statSync();
     final sizeMb = stat.size / (1024 * 1024);
@@ -125,7 +130,7 @@ class ILovePdfService {
           data: {'public_key': ApiConfig.publicKey},
           cancelToken: cancelToken,
         );
-        _ensureOk(r, fallback: 'Authentication failed.');
+        _ensureOk(r, fallback: 'Authentication failed');
         final token = r.data?['token'] as String?;
         if (token == null || token.isEmpty) {
           throw const AuthException();
@@ -135,7 +140,7 @@ class ILovePdfService {
     );
   }
 
-  Future<String> _startTask(String tool, {CancelToken? cancelToken}) async {
+  Future<({String task, String server})> _startTask(String tool, {CancelToken? cancelToken}) async {
     return _withRetry(
       cancelToken: cancelToken,
       action: () async {
@@ -144,17 +149,19 @@ class ILovePdfService {
           options: _authHeaders(),
           cancelToken: cancelToken,
         );
-        _ensureOk(r, fallback: 'Could not start task.');
+        _ensureOk(r, fallback: 'Could not start task');
         final task = r.data?['task'] as String?;
-        if (task == null || task.isEmpty) {
-          throw const ServerException('No task id returned.');
+        final server = r.data?['server'] as String?;
+        if (task == null || task.isEmpty || server == null || server.isEmpty) {
+          throw const ServerException('No task id or server returned.');
         }
-        return task;
+        return (task: task, server: server);
       },
     );
   }
 
   Future<String> _uploadFile({
+    required String server,
     required String task,
     required File file,
     CancelToken? cancelToken,
@@ -168,7 +175,7 @@ class ILovePdfService {
           'file': await MultipartFile.fromFile(file.path),
         });
         final r = await _dio.post<Map<String, dynamic>>(
-          '/upload',
+          'https://$server/v1/upload',
           data: form,
           options: _authHeaders(),
           cancelToken: cancelToken,
@@ -176,7 +183,7 @@ class ILovePdfService {
             if (t > 0) onProgress?.call(s / t);
           },
         );
-        _ensureOk(r, fallback: 'Upload failed.');
+        _ensureOk(r, fallback: 'Upload failed');
         final name = r.data?['server_filename'] as String?;
         if (name == null) {
           throw const ServerException('Upload did not return a filename.');
@@ -187,6 +194,7 @@ class ILovePdfService {
   }
 
   Future<void> _process({
+    required String server,
     required String task,
     required ToolType tool,
     required List<_ServerFile> files,
@@ -205,17 +213,18 @@ class ILovePdfService {
           ...options,
         };
         final r = await _dio.post<Map<String, dynamic>>(
-          '/process',
+          'https://$server/v1/process',
           data: payload,
           options: _authHeaders(),
           cancelToken: cancelToken,
         );
-        _ensureOk(r, fallback: 'Processing failed.');
+        _ensureOk(r, fallback: 'Processing failed');
       },
     );
   }
 
   Future<Uint8List> _download({
+    required String server,
     required String task,
     CancelToken? cancelToken,
     void Function(double)? onProgress,
@@ -224,14 +233,14 @@ class ILovePdfService {
       cancelToken: cancelToken,
       action: () async {
         final r = await _dio.get<List<int>>(
-          '/download/$task',
+          'https://$server/v1/download/$task',
           options: _authHeaders(responseType: ResponseType.bytes),
           cancelToken: cancelToken,
           onReceiveProgress: (s, t) {
             if (t > 0) onProgress?.call(s / t);
           },
         );
-        _ensureOk(r, fallback: 'Download failed.');
+        _ensureOk(r, fallback: 'Download failed');
         final data = r.data;
         if (data == null || data.isEmpty) {
           throw const ServerException('Empty download payload.');
@@ -263,26 +272,29 @@ class ILovePdfService {
   void _ensureOk(Response<dynamic> r, {required String fallback}) {
     final status = r.statusCode ?? 0;
     if (status >= 200 && status < 300) return;
+    
+    final serverMsg = _extractMessage(r.data);
+    
     if (status == 401 || status == 403) {
-      throw const AuthException();
+      throw AuthException(serverMsg ?? 'Invalid or expired API credentials');
     }
     if (status == 413) {
-      throw FileTooLargeException(0, ApiConfig.maxFileSizeMb.toInt());
+      throw FileTooLargeException(0.0, ApiConfig.maxFileSizeMb);
     }
-    if (status == 415 || status == 422) {
-      final msg = _extractMessage(r.data) ?? fallback;
-      throw ServerException(msg);
-    }
-    if (status >= 500) {
-      throw ServerException(_extractMessage(r.data));
-    }
-    throw ServerException(_extractMessage(r.data) ?? fallback);
+    
+    final finalMsg = serverMsg ?? '$fallback ($status)';
+    throw ServerException(finalMsg);
   }
 
   String? _extractMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
+      // iLovePDF sometimes nests error details
+      final error = data['error'];
+      if (error is Map<String, dynamic>) {
+        return error['message']?.toString();
+      }
       final v = data['message'] ?? data['error'] ?? data['name'];
-      if (v is String && v.trim().isNotEmpty) return v;
+      if (v != null && v.toString().trim().isNotEmpty) return v.toString();
     }
     return null;
   }
@@ -330,6 +342,7 @@ class ILovePdfService {
   }
 
   DocFlowException _mapDio(DioException e) {
+    final serverMsg = _extractMessage(e.response?.data);
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
@@ -341,16 +354,13 @@ class ILovePdfService {
         return const CancelledException();
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode ?? 0;
-        if (code == 401 || code == 403) return const AuthException();
-        if (code == 413) return FileTooLargeException(0, ApiConfig.maxFileSizeMb);
-        if (code == 415 || code == 422) {
-          return ServerException(_extractMessage(e.response?.data));
+        if (code == 401 || code == 403) {
+          return AuthException(serverMsg ?? 'Invalid or expired API credentials');
         }
-        return ServerException(_extractMessage(e.response?.data));
-      case DioExceptionType.badCertificate:
-      case DioExceptionType.transformTimeout:
-      case DioExceptionType.unknown:
-        return ServerException(_extractMessage(e.response?.data));
+        if (code == 413) return FileTooLargeException(0.0, ApiConfig.maxFileSizeMb);
+        return ServerException(serverMsg ?? 'Server Error ($code)');
+      default:
+        return ServerException(serverMsg ?? 'Unexpected connection error');
     }
   }
 }

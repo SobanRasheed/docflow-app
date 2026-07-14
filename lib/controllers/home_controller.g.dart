@@ -15,15 +15,15 @@ final homeControllerProvider = HomeControllerProvider._();
 final class HomeControllerProvider
     extends $AsyncNotifierProvider<HomeController, List<ToolType>> {
   HomeControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'homeControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'homeControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$homeControllerHash();
@@ -41,14 +41,11 @@ abstract class _$HomeController extends $AsyncNotifier<List<ToolType>> {
   @override
   void runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<ToolType>>, List<ToolType>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<List<ToolType>>, List<ToolType>>,
-              AsyncValue<List<ToolType>>,
-              Object?,
-              Object?
-            >;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<ToolType>>, List<ToolType>>,
+        AsyncValue<List<ToolType>>,
+        Object?,
+        Object?>;
     element.handleCreate(ref, build);
   }
 }

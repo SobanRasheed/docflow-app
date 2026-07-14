@@ -128,13 +128,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
                 SocialButton(
                   label: 'Google',
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
+                  icon: Image.asset(
+                    'lib/assets/google_logo.png',
                     height: 24,
+                    width: 24,
                   ),
                   onPressed: () {
                     // TODO: Implement Google Sign-In
-                    context.go(RouteNames.home);
                   },
                 ),
                 const SizedBox(height: 16),
@@ -144,7 +144,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   color: const Color(0xFF1877F2),
                   onPressed: () {
                     // TODO: Implement Facebook Login
-                    context.go(RouteNames.home);
                   },
                 ),
                 const SizedBox(height: 24),

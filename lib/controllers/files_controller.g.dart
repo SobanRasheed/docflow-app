@@ -12,19 +12,18 @@ part of 'files_controller.dart';
 @ProviderFor(FilesController)
 final filesControllerProvider = FilesControllerProvider._();
 
-final class FilesControllerProvider
-    extends
-        $AsyncNotifierProvider<FilesController, List<ConversionHistoryItem>> {
+final class FilesControllerProvider extends $AsyncNotifierProvider<
+    FilesController, List<ConversionHistoryItem>> {
   FilesControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'filesControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'filesControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$filesControllerHash();
@@ -42,23 +41,14 @@ abstract class _$FilesController
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref =
-        this.ref
-            as $Ref<
-              AsyncValue<List<ConversionHistoryItem>>,
-              List<ConversionHistoryItem>
-            >;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<
-                AsyncValue<List<ConversionHistoryItem>>,
-                List<ConversionHistoryItem>
-              >,
-              AsyncValue<List<ConversionHistoryItem>>,
-              Object?,
-              Object?
-            >;
+    final ref = this.ref as $Ref<AsyncValue<List<ConversionHistoryItem>>,
+        List<ConversionHistoryItem>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<ConversionHistoryItem>>,
+            List<ConversionHistoryItem>>,
+        AsyncValue<List<ConversionHistoryItem>>,
+        Object?,
+        Object?>;
     element.handleCreate(ref, build);
   }
 }

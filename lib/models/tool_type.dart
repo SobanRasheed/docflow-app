@@ -37,14 +37,13 @@ class ToolType {
     id: 'pdf_to_word',
     title: 'PDF to Word',
     subtitle: 'Editable .docx output',
-    toolCode: 'pdfoffice',
+    toolCode: 'pdfword',
     icon: Icons.description_outlined,
     color: Color(0xFF2563EB),
     category: ToolCategory.convert,
     acceptedInputs: ['pdf'],
     outputExtension: 'docx',
     supportsMultiple: false,
-    defaultOptions: {'output': 'word'},
   );
 
   static const wordToPdf = ToolType(
@@ -64,14 +63,13 @@ class ToolType {
     id: 'pdf_to_excel',
     title: 'PDF to Excel',
     subtitle: 'Editable .xlsx output',
-    toolCode: 'pdfoffice',
+    toolCode: 'pdfexcel',
     icon: Icons.table_chart_outlined,
     color: Color(0xFF16A34A),
     category: ToolCategory.convert,
     acceptedInputs: ['pdf'],
     outputExtension: 'xlsx',
     supportsMultiple: false,
-    defaultOptions: {'output': 'excel'},
   );
 
   static const excelToPdf = ToolType(
@@ -189,32 +187,4 @@ class ToolType {
   }
 
   Map<String, dynamic> toJson() => {'id': id};
-
-  ToolType copyWith({
-    String? id,
-    String? title,
-    String? subtitle,
-    String? toolCode,
-    IconData? icon,
-    Color? color,
-    ToolCategory? category,
-    List<String>? acceptedInputs,
-    String? outputExtension,
-    bool? supportsMultiple,
-    Map<String, dynamic>? defaultOptions,
-  }) {
-    return ToolType(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle,
-      toolCode: toolCode ?? this.toolCode,
-      icon: icon ?? this.icon,
-      color: color ?? this.color,
-      category: category ?? this.category,
-      acceptedInputs: acceptedInputs ?? this.acceptedInputs,
-      outputExtension: outputExtension ?? this.outputExtension,
-      supportsMultiple: supportsMultiple ?? this.supportsMultiple,
-      defaultOptions: defaultOptions ?? this.defaultOptions,
-    );
-  }
 }

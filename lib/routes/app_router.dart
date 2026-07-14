@@ -27,7 +27,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      final isAuth = authState.valueOrNull != null;
+      final isAuth = authState.value != null;
       final isGoingToLogin = state.matchedLocation == RouteNames.login || state.matchedLocation == RouteNames.register;
 
       if (!isAuth && !isGoingToLogin) {

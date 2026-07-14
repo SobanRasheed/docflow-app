@@ -15,15 +15,15 @@ final progressControllerProvider = ProgressControllerProvider._();
 final class ProgressControllerProvider
     extends $AsyncNotifierProvider<ProgressController, ConversionState> {
   ProgressControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'progressControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'progressControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$progressControllerHash();
@@ -34,7 +34,7 @@ final class ProgressControllerProvider
 }
 
 String _$progressControllerHash() =>
-    r'3d3232464cf4eab970778c2cb364b6be08092c2f';
+    r'20207fc771cb32eb03f7ede0457831a185b68418';
 
 abstract class _$ProgressController extends $AsyncNotifier<ConversionState> {
   FutureOr<ConversionState> build();
@@ -42,14 +42,11 @@ abstract class _$ProgressController extends $AsyncNotifier<ConversionState> {
   @override
   void runBuild() {
     final ref = this.ref as $Ref<AsyncValue<ConversionState>, ConversionState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<ConversionState>, ConversionState>,
-              AsyncValue<ConversionState>,
-              Object?,
-              Object?
-            >;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<ConversionState>, ConversionState>,
+        AsyncValue<ConversionState>,
+        Object?,
+        Object?>;
     element.handleCreate(ref, build);
   }
 }

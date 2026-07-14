@@ -13,12 +13,18 @@ class ApiConfig {
   static const int maxRetries = 2;
   static const int maxFileSizeMb = 50;
 
-  /// Reads the iLovePDF public key from --dart-define first, then falls back
-  /// to a gitignored .env file. The getter contains no secret literal itself.
+  /// iLovePDF Public Key
   static String get publicKey {
+    // 1. Try --dart-define
     const env = String.fromEnvironment('ILOVEPDF_PUBLIC_KEY');
     if (env.isNotEmpty) return env;
-    return dotenv.maybeGet('ILOVEPDF_PUBLIC_KEY') ?? '';
+    
+    // 2. Try .env file
+    final dotEnvKey = dotenv.maybeGet('ILOVEPDF_PUBLIC_KEY');
+    if (dotEnvKey != null && dotEnvKey.isNotEmpty) return dotEnvKey;
+
+    // 3. Hardcoded fallback (your provided key)
+    return 'project_public_12caf94bff6a22a64d34bcf28f2450be_CasLM3395ec90549c1992fa7e78429f3665da';
   }
 
   static bool get hasPublicKey => publicKey.isNotEmpty;

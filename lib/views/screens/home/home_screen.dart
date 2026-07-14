@@ -45,7 +45,7 @@ class HomeScreen extends ConsumerWidget {
             _buildSection(context, 'Organize', tools, ToolCategory.organize),
             const SizedBox(height: 24),
             _buildSection(context, 'Optimize', tools, ToolCategory.optimize),
-            const SizedBox(height: 100),
+            const SizedBox(height: 24),
           ],
         ),
       ),

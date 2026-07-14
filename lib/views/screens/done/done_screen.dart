@@ -89,7 +89,7 @@ class DoneScreen extends ConsumerWidget {
               AppButton(
                 label: 'Share File',
                 icon: Icons.share,
-                onPressed: () => SharePlus.instance.share(ShareParams(files: [XFile(result.path)])),
+                onPressed: () => Share.shareXFiles([XFile(result.path)]),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
