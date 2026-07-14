@@ -154,9 +154,7 @@ class ToolType {
   );
 
   static const List<ToolType> all = [
-    pdfToWord,
     wordToPdf,
-    pdfToExcel,
     excelToPdf,
     mergePdf,
     splitPdf,
