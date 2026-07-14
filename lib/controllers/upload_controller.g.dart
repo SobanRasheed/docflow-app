@@ -33,7 +33,7 @@ final class UploadControllerProvider
   UploadController create() => UploadController();
 }
 
-String _$uploadControllerHash() => r'b5dca84106934d3a81f2d5a4fb41eb74a2494426';
+String _$uploadControllerHash() => r'63cbc252c850c54a4ee34c1ad163041b8dfdf2ef';
 
 abstract class _$UploadController extends $AsyncNotifier<UploadState> {
   FutureOr<UploadState> build();

@@ -11,7 +11,9 @@ class ToolType {
     required this.id,
     required this.title,
     required this.subtitle,
-    required this.toolCode,
+    required this.operation,
+    this.inputFormat,
+    this.outputFormat,
     required this.icon,
     required this.color,
     required this.category,
@@ -24,7 +26,9 @@ class ToolType {
   final String id;
   final String title;
   final String subtitle;
-  final String toolCode;
+  final String operation;
+  final String? inputFormat;
+  final String? outputFormat;
   final IconData icon;
   final Color color;
   final ToolCategory category;
@@ -37,7 +41,9 @@ class ToolType {
     id: 'pdf_to_word',
     title: 'PDF to Word',
     subtitle: 'Editable .docx output',
-    toolCode: 'pdfword',
+    operation: 'convert',
+    inputFormat: 'pdf',
+    outputFormat: 'docx',
     icon: Icons.description_outlined,
     color: Color(0xFF2563EB),
     category: ToolCategory.convert,
@@ -50,7 +56,9 @@ class ToolType {
     id: 'word_to_pdf',
     title: 'Word to PDF',
     subtitle: '.doc / .docx to .pdf',
-    toolCode: 'officepdf',
+    operation: 'convert',
+    inputFormat: 'docx',
+    outputFormat: 'pdf',
     icon: Icons.picture_as_pdf_outlined,
     color: Color(0xFFDC2626),
     category: ToolCategory.convert,
@@ -63,7 +71,9 @@ class ToolType {
     id: 'pdf_to_excel',
     title: 'PDF to Excel',
     subtitle: 'Editable .xlsx output',
-    toolCode: 'pdfexcel',
+    operation: 'convert',
+    inputFormat: 'pdf',
+    outputFormat: 'xlsx',
     icon: Icons.table_chart_outlined,
     color: Color(0xFF16A34A),
     category: ToolCategory.convert,
@@ -76,7 +86,9 @@ class ToolType {
     id: 'excel_to_pdf',
     title: 'Excel to PDF',
     subtitle: '.xls / .xlsx to .pdf',
-    toolCode: 'officepdf',
+    operation: 'convert',
+    inputFormat: 'xlsx',
+    outputFormat: 'pdf',
     icon: Icons.grid_on_outlined,
     color: Color(0xFFEA580C),
     category: ToolCategory.convert,
@@ -89,7 +101,8 @@ class ToolType {
     id: 'merge_pdf',
     title: 'Merge PDF',
     subtitle: 'Combine multiple PDFs',
-    toolCode: 'merge',
+    operation: 'merge',
+    outputFormat: 'pdf',
     icon: Icons.call_merge_outlined,
     color: Color(0xFF7C3AED),
     category: ToolCategory.organize,
@@ -101,36 +114,38 @@ class ToolType {
   static const splitPdf = ToolType(
     id: 'split_pdf',
     title: 'Split PDF',
-    subtitle: 'Extract ranges into a zip',
-    toolCode: 'split',
+    subtitle: 'Extract pages to ZIP',
+    operation: 'convert',
+    inputFormat: 'pdf',
+    outputFormat: 'zip',
     icon: Icons.call_split_outlined,
     color: Color(0xFF0891B2),
     category: ToolCategory.organize,
     acceptedInputs: ['pdf'],
     outputExtension: 'zip',
     supportsMultiple: false,
-    defaultOptions: {'split_mode': 'ranges', 'ranges': '1'},
   );
 
   static const compressPdf = ToolType(
     id: 'compress_pdf',
     title: 'Compress PDF',
     subtitle: 'Reduce file size',
-    toolCode: 'compress',
+    operation: 'compress',
+    outputFormat: 'pdf',
     icon: Icons.compress_outlined,
     color: Color(0xFFDB2777),
     category: ToolCategory.optimize,
     acceptedInputs: ['pdf'],
     outputExtension: 'pdf',
     supportsMultiple: false,
-    defaultOptions: {'compression_level': 'recommended'},
   );
 
   static const imageToPdf = ToolType(
     id: 'image_to_pdf',
     title: 'Image to PDF',
     subtitle: 'JPG / PNG to PDF',
-    toolCode: 'imagepdf',
+    operation: 'convert',
+    outputFormat: 'pdf',
     icon: Icons.image_outlined,
     color: Color(0xFFCA8A04),
     category: ToolCategory.convert,
@@ -143,18 +158,21 @@ class ToolType {
     id: 'pdf_to_image',
     title: 'PDF to Image',
     subtitle: 'Each page as JPG',
-    toolCode: 'pdfjpg',
+    operation: 'convert',
+    inputFormat: 'pdf',
+    outputFormat: 'jpg',
     icon: Icons.photo_library_outlined,
     color: Color(0xFF0D9488),
     category: ToolCategory.convert,
     acceptedInputs: ['pdf'],
     outputExtension: 'zip',
     supportsMultiple: false,
-    defaultOptions: {'pdfjpg_mode': 'pages'},
   );
 
   static const List<ToolType> all = [
+    pdfToWord,
     wordToPdf,
+    pdfToExcel,
     excelToPdf,
     mergePdf,
     splitPdf,
@@ -186,3 +204,4 @@ class ToolType {
 
   Map<String, dynamic> toJson() => {'id': id};
 }
+

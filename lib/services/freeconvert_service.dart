@@ -1,16 +1,4 @@
-// ============================================================================
-// SECURITY NOTICE
-// ----------------------------------------------------------------------------
-// This file is the ONLY layer that talks to iLovePDF directly. When migrating
-// to a Node.js backend, replace the body of `convert()` (and the private
-// helpers below) to call your backend instead — controllers, views, models and
-// routes do not need to change.
-//
-// IMPORTANT: The direct-API approach used here is NOT safe for production
-// distribution. The iLovePDF public key is bundled in the compiled app and is
-// trivially extractable. Use this build only for local testing.
-// ============================================================================
-
+import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -24,14 +12,13 @@ import '../core/config/api_config.dart';
 import '../core/utils/exceptions.dart';
 import '../models/tool_type.dart';
 
-class ILovePdfService {
-  ILovePdfService({Dio? dio, Connectivity? connectivity})
+class FreeConvertService {
+  FreeConvertService({Dio? dio, Connectivity? connectivity})
       : _dio = dio ?? DioClient.create(),
         _connectivity = connectivity ?? Connectivity();
 
   final Dio _dio;
   final Connectivity _connectivity;
-  String? _jwt;
 
   Future<File> convert(
     File input,
@@ -44,51 +31,111 @@ class ILovePdfService {
     if (!ApiConfig.hasPublicKey) {
       throw const MissingConfigurationException();
     }
-    _validateInput(input, tool);
-    if (extras != null) {
-      for (final f in extras) {
-        _validateInput(f, tool);
-      }
+    final allFiles = [input, if (extras != null) ...extras];
+    for (final f in allFiles) {
+      _validateInput(f, tool);
     }
     await _ensureOnline(cancelToken: cancelToken);
 
-    final jwt = await _authenticate(cancelToken: cancelToken);
-    _jwt = jwt;
-
-    final startResponse = await _startTask(tool.toolCode, cancelToken: cancelToken);
-    final task = startResponse.task;
-    final server = startResponse.server;
-
-    final files = <File>[input, if (extras != null) ...extras];
-    final serverFiles = <_ServerFile>[];
-    for (var i = 0; i < files.length; i++) {
-      final f = files[i];
-      final baseProgress = i / files.length;
-      final span = 1 / files.length;
-      final serverName = await _uploadFile(
-        server: server,
-        task: task,
-        file: f,
-        cancelToken: cancelToken,
-        onProgress: (p) => onProgress?.call(
-          (baseProgress + p * span * 0.6).clamp(0.0, 0.6),
-        ),
-      );
-      serverFiles.add(_ServerFile(serverName, p.basename(f.path)));
+    // 1. Create Job with tasks
+    final tasks = <String, dynamic>{};
+    final importTaskIds = <String>[];
+    
+    // Create import tasks
+    for (var i = 0; i < allFiles.length; i++) {
+      final taskId = 'import-${i + 1}';
+      importTaskIds.add(taskId);
+      tasks[taskId] = {
+        'operation': 'import/upload',
+      };
     }
 
-    await _process(
-      server: server,
-      task: task,
-      tool: tool,
-      files: serverFiles,
-      options: {...tool.defaultOptions, ...?options},
-      cancelToken: cancelToken,
-    );
+    // Merge uses multiple inputs, others use a single input (or multiple if applicable)
+    final inputTasks = importTaskIds.length == 1 ? importTaskIds.first : importTaskIds;
 
+    // Create process task
+    tasks['process-1'] = {
+      'operation': tool.operation,
+      'input': inputTasks,
+      if (tool.inputFormat != null) 'input_format': tool.inputFormat,
+      if (tool.outputFormat != null) 'output_format': tool.outputFormat,
+      if (tool.defaultOptions.isNotEmpty || (options != null && options.isNotEmpty))
+        'options': {
+          ...tool.defaultOptions,
+          ...?options,
+        }
+    };
+
+    // Create export task
+    tasks['export-1'] = {
+      'operation': 'export/url',
+      'input': ['process-1'],
+    };
+
+    final jobPayload = {'tasks': tasks};
+
+    // Initialize Job
+    onProgress?.call(0.05);
+    final jobResponse = await _createJob(jobPayload, cancelToken: cancelToken);
+    final jobId = jobResponse['id'] as String;
+    final serverTasks = jobResponse['tasks'] as List<dynamic>;
+
+    // 2. Upload Files
+    final importTasksResponse = serverTasks.where((t) => t['operation'] == 'import/upload').toList();
+    if (importTasksResponse.length != allFiles.length) {
+      throw const ServerException('Mismatch in import tasks generated.');
+    }
+
+    for (var i = 0; i < allFiles.length; i++) {
+      final file = allFiles[i];
+      final taskData = importTasksResponse[i];
+      final formInfo = taskData['result']['form'] as Map<String, dynamic>;
+      final uploadUrl = formInfo['url'] as String;
+      final parameters = formInfo['parameters'] as Map<String, dynamic>;
+
+      final baseProgress = 0.1 + (i / allFiles.length) * 0.4;
+      final span = 0.4 / allFiles.length;
+
+      await _uploadFile(
+        url: uploadUrl,
+        parameters: parameters,
+        file: file,
+        cancelToken: cancelToken,
+        onProgress: (p) => onProgress?.call((baseProgress + p * span).clamp(0.1, 0.5)),
+      );
+    }
+
+    // 3. Poll for Completion
+    onProgress?.call(0.6);
+    String? downloadUrl;
+    while (true) {
+      if (cancelToken?.isCancelled ?? false) throw const CancelledException();
+      
+      final jobStatusResponse = await _getJobStatus(jobId, cancelToken: cancelToken);
+      final status = jobStatusResponse['status'] as String;
+      
+      if (status == 'completed') {
+        final jobTasks = jobStatusResponse['tasks'] as List<dynamic>;
+        final exportTask = jobTasks.firstWhere((t) => t['operation'] == 'export/url');
+        downloadUrl = exportTask['result']['url'] as String?;
+        break;
+      } else if (status == 'failed') {
+        final jobTasks = jobStatusResponse['tasks'] as List<dynamic>;
+        final failedTask = jobTasks.firstWhere((t) => t['status'] == 'failed', orElse: () => <String, dynamic>{});
+        final msg = failedTask['message'] ?? 'Conversion task failed';
+        throw ServerException(msg.toString());
+      }
+
+      await Future.delayed(const Duration(seconds: 3));
+    }
+
+    if (downloadUrl == null || downloadUrl.isEmpty) {
+      throw const ServerException('Failed to get download URL from task.');
+    }
+
+    // 4. Download Result
     final bytes = await _download(
-      server: server,
-      task: task,
+      url: downloadUrl,
       cancelToken: cancelToken,
       onProgress: (p) => onProgress?.call((0.6 + p * 0.4).clamp(0.6, 1.0)),
     );
@@ -112,57 +159,32 @@ class ILovePdfService {
   }
 
   Future<void> _ensureOnline({CancelToken? cancelToken}) async {
-    if (cancelToken?.isCancelled ?? false) {
-      throw const CancelledException();
-    }
+    if (cancelToken?.isCancelled ?? false) throw const CancelledException();
     final result = await _connectivity.checkConnectivity();
     if (result.any((c) => c == ConnectivityResult.none)) {
       throw const NetworkException();
     }
   }
 
-  Future<String> _authenticate({CancelToken? cancelToken}) async {
+  Future<Map<String, dynamic>> _createJob(Map<String, dynamic> payload, {CancelToken? cancelToken}) async {
     return _withRetry(
       cancelToken: cancelToken,
       action: () async {
         final r = await _dio.post<Map<String, dynamic>>(
-          '/auth',
-          data: {'public_key': ApiConfig.publicKey},
-          cancelToken: cancelToken,
-        );
-        _ensureOk(r, fallback: 'Authentication failed');
-        final token = r.data?['token'] as String?;
-        if (token == null || token.isEmpty) {
-          throw const AuthException();
-        }
-        return token;
-      },
-    );
-  }
-
-  Future<({String task, String server})> _startTask(String tool, {CancelToken? cancelToken}) async {
-    return _withRetry(
-      cancelToken: cancelToken,
-      action: () async {
-        final r = await _dio.get<Map<String, dynamic>>(
-          '/start/$tool',
+          ApiConfig.baseUrl,
+          data: payload,
           options: _authHeaders(),
           cancelToken: cancelToken,
         );
-        _ensureOk(r, fallback: 'Could not start task');
-        final task = r.data?['task'] as String?;
-        final server = r.data?['server'] as String?;
-        if (task == null || task.isEmpty || server == null || server.isEmpty) {
-          throw const ServerException('No task id or server returned.');
-        }
-        return (task: task, server: server);
+        _ensureOk(r, fallback: 'Could not create job');
+        return r.data!;
       },
     );
   }
 
-  Future<String> _uploadFile({
-    required String server,
-    required String task,
+  Future<void> _uploadFile({
+    required String url,
+    required Map<String, dynamic> parameters,
     required File file,
     CancelToken? cancelToken,
     void Function(double)? onProgress,
@@ -170,62 +192,43 @@ class ILovePdfService {
     return _withRetry(
       cancelToken: cancelToken,
       action: () async {
-        final form = FormData.fromMap({
-          'task': task,
-          'file': await MultipartFile.fromFile(file.path),
-        });
-        final r = await _dio.post<Map<String, dynamic>>(
-          'https://$server/v1/upload',
+        final formMap = <String, dynamic>{...parameters};
+        formMap['file'] = await MultipartFile.fromFile(file.path, filename: p.basename(file.path));
+        final form = FormData.fromMap(formMap);
+
+        final r = await _dio.post<dynamic>(
+          url,
           data: form,
-          options: _authHeaders(),
           cancelToken: cancelToken,
           onSendProgress: (s, t) {
             if (t > 0) onProgress?.call(s / t);
           },
         );
-        _ensureOk(r, fallback: 'Upload failed');
-        final name = r.data?['server_filename'] as String?;
-        if (name == null) {
-          throw const ServerException('Upload did not return a filename.');
+        final status = r.statusCode ?? 0;
+        if (status < 200 || status >= 300) {
+          throw ServerException('Upload failed with status $status');
         }
-        return name;
       },
     );
   }
 
-  Future<void> _process({
-    required String server,
-    required String task,
-    required ToolType tool,
-    required List<_ServerFile> files,
-    required Map<String, dynamic> options,
-    CancelToken? cancelToken,
-  }) async {
+  Future<Map<String, dynamic>> _getJobStatus(String jobId, {CancelToken? cancelToken}) async {
     return _withRetry(
       cancelToken: cancelToken,
       action: () async {
-        final payload = <String, dynamic>{
-          'task': task,
-          'tool': tool.toolCode,
-          'files': files
-              .map((f) => {'server_filename': f.name, 'filename': f.original})
-              .toList(),
-          ...options,
-        };
-        final r = await _dio.post<Map<String, dynamic>>(
-          'https://$server/v1/process',
-          data: payload,
+        final r = await _dio.get<Map<String, dynamic>>(
+          '${ApiConfig.baseUrl}/$jobId',
           options: _authHeaders(),
           cancelToken: cancelToken,
         );
-        _ensureOk(r, fallback: 'Processing failed');
+        _ensureOk(r, fallback: 'Could not fetch job status');
+        return r.data!;
       },
     );
   }
 
   Future<Uint8List> _download({
-    required String server,
-    required String task,
+    required String url,
     CancelToken? cancelToken,
     void Function(double)? onProgress,
   }) async {
@@ -233,14 +236,17 @@ class ILovePdfService {
       cancelToken: cancelToken,
       action: () async {
         final r = await _dio.get<List<int>>(
-          'https://$server/v1/download/$task',
-          options: _authHeaders(responseType: ResponseType.bytes),
+          url,
+          options: Options(responseType: ResponseType.bytes),
           cancelToken: cancelToken,
           onReceiveProgress: (s, t) {
             if (t > 0) onProgress?.call(s / t);
           },
         );
-        _ensureOk(r, fallback: 'Download failed');
+        final status = r.statusCode ?? 0;
+        if (status < 200 || status >= 300) {
+          throw ServerException('Download failed with status $status');
+        }
         final data = r.data;
         if (data == null || data.isEmpty) {
           throw const ServerException('Empty download payload.');
@@ -256,16 +262,15 @@ class ILovePdfService {
     if (!outDir.existsSync()) await outDir.create(recursive: true);
     final stem = p.basenameWithoutExtension(input.path);
     final ts = DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]'), '-');
-    final outPath = p.join(outDir.path, '${stem}_${ts}.${tool.outputExtension}');
+    final outPath = p.join(outDir.path, '${stem}_${ts}.${tool.outputFormat ?? tool.outputExtension}');
     final outFile = File(outPath);
     await outFile.writeAsBytes(bytes, flush: true);
     return outFile;
   }
 
-  Options _authHeaders({ResponseType? responseType}) {
+  Options _authHeaders() {
     return Options(
-      headers: {'Authorization': 'Bearer ${_jwt ?? ''}'},
-      responseType: responseType,
+      headers: {'Authorization': 'Bearer ${ApiConfig.publicKey}'},
     );
   }
 
@@ -288,7 +293,6 @@ class ILovePdfService {
 
   String? _extractMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
-      // iLovePDF sometimes nests error details
       final error = data['error'];
       if (error is Map<String, dynamic>) {
         return error['message']?.toString();
@@ -308,7 +312,7 @@ class ILovePdfService {
     }
     if (e.type == DioExceptionType.badResponse) {
       final code = e.response?.statusCode ?? 0;
-      return code >= 500;
+      return code >= 500 || code == 429;
     }
     return false;
   }
@@ -319,9 +323,7 @@ class ILovePdfService {
   }) async {
     var attempt = 0;
     while (true) {
-      if (cancelToken?.isCancelled ?? false) {
-        throw const CancelledException();
-      }
+      if (cancelToken?.isCancelled ?? false) throw const CancelledException();
       try {
         return await action();
       } on DocFlowException {
@@ -363,10 +365,4 @@ class ILovePdfService {
         return ServerException(serverMsg ?? 'Unexpected connection error');
     }
   }
-}
-
-class _ServerFile {
-  const _ServerFile(this.name, this.original);
-  final String name;
-  final String original;
 }

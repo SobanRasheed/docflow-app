@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 import '../core/utils/exceptions.dart';
 import '../models/conversion_history_item.dart';
 import '../models/tool_type.dart';
-import '../services/ilovepdf_service.dart';
+import '../services/freeconvert_service.dart';
 import 'done_controller.dart';
 import 'files_controller.dart';
 import 'upload_controller.dart';
@@ -52,7 +52,7 @@ class ProgressController extends AsyncNotifier<ConversionState> {
     state = AsyncData(ConversionState(progress: 0.0, tool: tool));
 
     try {
-      final service = ILovePdfService();
+      final service = FreeConvertService();
       final result = await service.convert(
         files.first,
         tool,
