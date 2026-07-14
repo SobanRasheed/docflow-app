@@ -1,0 +1,47 @@
+name: docflow
+description: DocFlow — premium document conversion.
+publish_to: "none"
+version: 1.0.0+1
+
+# NOTE: Versions below are pinned (no ^) to versions current as of training.
+# Flutter 3.41.6 / Dart 3.11.4 are forward-targets; verify each pin on pub.dev
+# if a constraint solver error appears during `flutter pub get`.
+
+environment:
+  sdk: ">=3.11.4 <4.0.0"
+  flutter: ">=3.41.6"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  connectivity_plus: 6.0.5
+  dio: 5.7.0
+  file_picker: 8.1.3
+  flutter_dotenv: 5.2.1
+  flutter_riverpod: 2.6.1
+  go_router: 14.6.2
+  google_fonts: 6.2.1
+  hive_ce: 2.1.0
+  hive_ce_flutter: 2.1.0
+  intl: 0.20.1
+  path: 1.9.0
+  path_provider: 2.1.5
+  permission_handler: 11.3.1
+  riverpod_annotation: 2.6.1
+  share_plus: 10.1.2
+  cupertino_icons: 1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 5.0.0
+  build_runner: 2.4.13
+  riverpod_generator: 2.6.2
+  riverpod_lint: 2.6.2
+  custom_lint: 0.7.0
+  hive_ce_generator: 2.1.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
