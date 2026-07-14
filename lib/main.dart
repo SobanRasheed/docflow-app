@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+
+import 'firebase_options.dart';
 
 import 'core/theme/theme.dart';
 import 'routes/app_router.dart';
@@ -14,6 +17,9 @@ Future<void> main() async {
   } catch (_) {
     // .env is optional when ILOVEPDF_PUBLIC_KEY is supplied via --dart-define.
   }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await Hive.initFlutter();
   await HistoryService().init();
   runApp(const ProviderScope(child: DocFlowApp()));

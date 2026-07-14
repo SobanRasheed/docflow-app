@@ -13,7 +13,7 @@ class ToolTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: InkWell(
-        onTap: () => context.go('${RouteNames.upload.split('/').first}/${tool.id}'),
+        onTap: () => context.go('/upload/${tool.id}'),
         borderRadius: BorderRadius.circular(AppSpacings.cardRadius),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacings.card),

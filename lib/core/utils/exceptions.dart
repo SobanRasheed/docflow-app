@@ -21,14 +21,14 @@ class AuthException extends DocFlowException {
 }
 
 class FileTooLargeException extends DocFlowException {
-  const FileTooLargeException(this.sizeMb, this.limitMb)
+  FileTooLargeException(this.sizeMb, this.limitMb)
       : super('File is ${sizeMb.toStringAsFixed(1)} MB; limit is $limitMb MB.');
   final double sizeMb;
   final int limitMb;
 }
 
 class UnsupportedFormatException extends DocFlowException {
-  const UnsupportedFormatException(this.extension, this.toolTitle)
+  UnsupportedFormatException(this.extension, this.toolTitle)
       : super('".$extension" is not supported for $toolTitle.');
   final String extension;
   final String toolTitle;

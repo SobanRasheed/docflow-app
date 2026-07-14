@@ -48,7 +48,7 @@ class UploadController extends AsyncNotifier<UploadState> {
   }
 
   Future<void> pickFiles() async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current?.tool == null) return;
     final tool = current!.tool!;
 
@@ -59,7 +59,7 @@ class UploadController extends AsyncNotifier<UploadState> {
     }
 
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await FilePicker.pickFiles(
         allowMultiple: tool.supportsMultiple,
         type: FileType.custom,
         allowedExtensions: tool.acceptedInputs,
@@ -86,7 +86,7 @@ class UploadController extends AsyncNotifier<UploadState> {
   }
 
   void clearFiles() {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       state = AsyncData(current.copyWith(files: const [], clearError: true));
     }

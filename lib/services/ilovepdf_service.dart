@@ -93,7 +93,7 @@ class ILovePdfService {
 
   void _validateInput(File file, ToolType tool) {
     if (!file.existsSync()) {
-      throw const FileTooLargeException(0, 0);
+      throw FileTooLargeException(0, ApiConfig.maxFileSizeMb.toInt());
     }
     final stat = file.statSync();
     final sizeMb = stat.size / (1024 * 1024);
@@ -267,7 +267,7 @@ class ILovePdfService {
       throw const AuthException();
     }
     if (status == 413) {
-      throw const FileTooLargeException(0, 0);
+      throw FileTooLargeException(0, ApiConfig.maxFileSizeMb.toInt());
     }
     if (status == 415 || status == 422) {
       final msg = _extractMessage(r.data) ?? fallback;
@@ -342,12 +342,13 @@ class ILovePdfService {
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode ?? 0;
         if (code == 401 || code == 403) return const AuthException();
-        if (code == 413) return const FileTooLargeException(0, 0);
+        if (code == 413) return FileTooLargeException(0, ApiConfig.maxFileSizeMb);
         if (code == 415 || code == 422) {
           return ServerException(_extractMessage(e.response?.data));
         }
         return ServerException(_extractMessage(e.response?.data));
       case DioExceptionType.badCertificate:
+      case DioExceptionType.transformTimeout:
       case DioExceptionType.unknown:
         return ServerException(_extractMessage(e.response?.data));
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../controllers/auth_controller.dart';
 import '../../../controllers/settings_controller.dart';
 import '../../../core/theme/colors.dart';
 
@@ -56,6 +57,17 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () {},
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildSectionHeader('Account'),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.logout, color: AppColors.danger),
+              title: const Text('Sign Out', style: TextStyle(color: AppColors.danger)),
+              onTap: () {
+                ref.read(authControllerProvider.notifier).signOut();
+              },
             ),
           ),
         ],

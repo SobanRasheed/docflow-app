@@ -37,7 +37,7 @@ class ProgressController extends AsyncNotifier<ConversionState> {
 
   @override
   Future<ConversionState> build() async {
-    final uploadState = ref.read(uploadControllerProvider).valueOrNull;
+    final uploadState = ref.read(uploadControllerProvider).value;
     if (uploadState == null || uploadState.tool == null || uploadState.files.isEmpty) {
       return const ConversionState(error: 'No files selected.');
     }

@@ -106,7 +106,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacings.cardRadius),
-          borderSide: const BorderSide(color: primary, width: 1.5),
+          borderSide: BorderSide(color: primary, width: 1.5),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1054933453473",
+    "project_id": "docflow-959dc",
+    "storage_bucket": "docflow-959dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1054933453473:android:4cea8a17099f4509247ee0",
+        "android_client_info": {
+          "package_name": "com.weversity.docflow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1054933453473-al9rfeakgvuq11ib1rvsbme0j4vrup6v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA6G1RfrrpDfQNO0tJ_7gcZV5TOf8rMfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1054933453473-al9rfeakgvuq11ib1rvsbme0j4vrup6v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

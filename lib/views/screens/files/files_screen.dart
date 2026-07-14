@@ -92,7 +92,7 @@ class FilesScreen extends ConsumerWidget {
                     trailing: exists
                         ? IconButton(
                             icon: const Icon(Icons.share_outlined),
-                            onPressed: () => Share.shareXFiles([XFile(file.outputPath)]),
+                            onPressed: () => SharePlus.instance.share(ShareParams(files: [XFile(file.outputPath)])),
                           )
                         : const Tooltip(
                             message: 'File missing',
