@@ -5,6 +5,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 import 'core/theme/theme.dart';
 import 'routes/app_router.dart';
+import 'services/history_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ Future<void> main() async {
     // .env is optional when ILOVEPDF_PUBLIC_KEY is supplied via --dart-define.
   }
   await Hive.initFlutter();
+  await HistoryService().init();
   runApp(const ProviderScope(child: DocFlowApp()));
 }
 
