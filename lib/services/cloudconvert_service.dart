@@ -270,7 +270,7 @@ class CloudConvertService {
 
   Options _authHeaders() {
     return Options(
-      headers: {'Authorization': 'Bearer ${ApiConfig.publicKey}'},
+      headers: {'Authorization': 'Bearer ${ApiConfig.currentPublicKey}'},
     );
   }
 
@@ -280,7 +280,7 @@ class CloudConvertService {
     
     final serverMsg = _extractMessage(r.data);
     
-    if (status == 401 || status == 403) {
+    if (status == 401 || status == 403 || status == 402) {
       throw AuthException(serverMsg ?? 'Invalid or expired API credentials');
     }
     if (status == 413) {
@@ -326,11 +326,25 @@ class CloudConvertService {
       if (cancelToken?.isCancelled ?? false) throw const CancelledException();
       try {
         return await action();
+      } on AuthException {
+        if (ApiConfig.currentKeyIndex < ApiConfig.publicKeys.length - 1) {
+          ApiConfig.currentKeyIndex++;
+          continue;
+        }
+        rethrow;
       } on DocFlowException {
         rethrow;
       } on DioException catch (e) {
         if (cancelToken?.isCancelled ?? false || e.type == DioExceptionType.cancel) {
           throw const CancelledException();
+        }
+        
+        final code = e.response?.statusCode ?? 0;
+        if (code == 402 || code == 401 || code == 403) {
+          if (ApiConfig.currentKeyIndex < ApiConfig.publicKeys.length - 1) {
+            ApiConfig.currentKeyIndex++;
+            continue;
+          }
         }
         if (_isRetryable(e) && attempt < ApiConfig.maxRetries) {
           attempt++;
@@ -356,7 +370,7 @@ class CloudConvertService {
         return const CancelledException();
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode ?? 0;
-        if (code == 401 || code == 403) {
+        if (code == 401 || code == 403 || code == 402) {
           return AuthException(serverMsg ?? 'Invalid or expired API credentials');
         }
         if (code == 413) return FileTooLargeException(0.0, ApiConfig.maxFileSizeMb);

@@ -13,18 +13,34 @@ class ApiConfig {
   static const int maxRetries = 2;
   static const int maxFileSizeMb = 50;
 
-  /// CloudConvert API Key
-  static String get publicKey {
+  static int currentKeyIndex = 0;
+
+  /// CloudConvert API Keys
+  static List<String> get publicKeys {
+    String rawKeys = '';
     // 1. Try --dart-define
     const env = String.fromEnvironment('CLOUDCONVERT_API_KEY');
-    if (env.isNotEmpty) return env;
+    if (env.isNotEmpty) {
+      rawKeys = env;
+    } else {
+      // 2. Try .env file
+      final dotEnvKey = dotenv.maybeGet('CLOUDCONVERT_API_KEY');
+      if (dotEnvKey != null && dotEnvKey.isNotEmpty) {
+        rawKeys = dotEnvKey;
+      }
+    }
     
-    // 2. Try .env file
-    final dotEnvKey = dotenv.maybeGet('CLOUDCONVERT_API_KEY');
-    if (dotEnvKey != null && dotEnvKey.isNotEmpty) return dotEnvKey;
-
-    return '';
+    if (rawKeys.isEmpty) return [];
+    
+    return rawKeys.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
   }
 
-  static bool get hasPublicKey => publicKey.isNotEmpty;
+  static String get currentPublicKey {
+    final keys = publicKeys;
+    if (keys.isEmpty) return '';
+    if (currentKeyIndex >= keys.length) return ''; // Exhausted
+    return keys[currentKeyIndex];
+  }
+
+  static bool get hasPublicKey => publicKeys.isNotEmpty;
 }
