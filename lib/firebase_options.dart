@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -58,5 +52,24 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1054933453473',
     projectId: 'docflow-959dc',
     storageBucket: 'docflow-959dc.firebasestorage.app',
+  );
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBNYxnYT3TIeWx90tzzAJXFcW2gWA7Ea_g',
+    appId: '1:1054933453473:web:adbca23d7fb45610247ee0',
+    messagingSenderId: '1054933453473',
+    projectId: 'docflow-959dc',
+    authDomain: 'docflow-959dc.firebaseapp.com',
+    storageBucket: 'docflow-959dc.firebasestorage.app',
+    measurementId: 'G-NHQBJWS23S',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAS1aH9Fpbktnn9qcrqSC29jMsKh4y_Swo',
+    appId: '1:1054933453473:ios:4e1868e23280f6bd247ee0',
+    messagingSenderId: '1054933453473',
+    projectId: 'docflow-959dc',
+    storageBucket: 'docflow-959dc.firebasestorage.app',
+    iosClientId: '1054933453473-jrr3p8va4rr9kg4cibkehuimvigu5mcg.apps.googleusercontent.com',
+    iosBundleId: 'com.weversity.docflow',
   );
 }
