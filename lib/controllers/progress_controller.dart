@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 import '../core/utils/exceptions.dart';
 import '../models/conversion_history_item.dart';
 import '../models/tool_type.dart';
-import '../services/freeconvert_service.dart';
+import '../services/cloudconvert_service.dart';
 import 'done_controller.dart';
 import 'files_controller.dart';
 import 'upload_controller.dart';
@@ -31,8 +31,8 @@ class ConversionState {
   final bool isCompleted;
 }
 
-@riverpod
-class ProgressController extends AsyncNotifier<ConversionState> {
+@Riverpod(keepAlive: true)
+class ProgressController extends _$ProgressController {
   CancelToken? _cancelToken;
 
   @override
@@ -52,7 +52,7 @@ class ProgressController extends AsyncNotifier<ConversionState> {
     state = AsyncData(ConversionState(progress: 0.0, tool: tool));
 
     try {
-      final service = FreeConvertService();
+      final service = CloudConvertService();
       final result = await service.convert(
         files.first,
         tool,

@@ -7,6 +7,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'firebase_options.dart';
 
 import 'core/theme/theme.dart';
+import 'controllers/settings_controller.dart';
 import 'routes/app_router.dart';
 import 'services/history_service.dart';
 
@@ -31,11 +32,15 @@ class DocFlowApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final settings = ref.watch(settingsControllerProvider).value;
+    final isDarkMode = settings?.isDarkMode ?? false;
+
     return MaterialApp.router(
       title: 'DocFlow',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       routerConfig: router,
     );
   }

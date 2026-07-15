@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../controllers/home_controller.dart';
 import '../../../core/theme/colors.dart';
@@ -14,7 +15,13 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final toolsAsync = ref.watch(homeControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('DocFlow')),
+      appBar: AppBar(
+        title: SvgPicture.asset(
+          'lib/assets/logo.svg',
+          height: 48,
+        ),
+        centerTitle: false,
+      ),
       body: toolsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),

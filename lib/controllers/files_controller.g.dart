@@ -20,7 +20,7 @@ final class FilesControllerProvider extends $AsyncNotifierProvider<
           argument: null,
           retry: null,
           name: r'filesControllerProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -33,7 +33,7 @@ final class FilesControllerProvider extends $AsyncNotifierProvider<
   FilesController create() => FilesController();
 }
 
-String _$filesControllerHash() => r'6a1f59fc18da739b3e89a01022708484bdbdd904';
+String _$filesControllerHash() => r'858b3d08e70e412fbd6f4ece31c903699b1b9313';
 
 abstract class _$FilesController
     extends $AsyncNotifier<List<ConversionHistoryItem>> {

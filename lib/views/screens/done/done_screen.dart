@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../controllers/done_controller.dart';
@@ -86,10 +87,24 @@ class DoneScreen extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              AppButton(
-                label: 'Share File',
-                icon: Icons.share,
-                onPressed: () => Share.shareXFiles([XFile(result.path)]),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'Share',
+                      icon: Icons.share,
+                      onPressed: () => Share.shareXFiles([XFile(result.path)]),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Open',
+                      icon: Icons.open_in_new,
+                      onPressed: () => OpenFilex.open(result.path),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               OutlinedButton(

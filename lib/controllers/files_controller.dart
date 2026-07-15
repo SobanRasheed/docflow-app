@@ -6,7 +6,7 @@ import '../services/history_service.dart';
 
 part 'files_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class FilesController extends AsyncNotifier<List<ConversionHistoryItem>> {
   late HistoryService _service;
 

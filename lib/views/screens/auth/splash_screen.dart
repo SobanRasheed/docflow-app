@@ -47,14 +47,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // Match the image's light background to avoid black bars
       body: FadeTransition(
         opacity: _fadeAnimation,
-        child: Image.asset(
-          'lib/assets/splash-screen.png',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+        child: SizedBox.expand(
+          child: Image.asset(
+            'lib/assets/splash-screen.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+          ),
         ),
       ),
     );

@@ -20,7 +20,7 @@ final class ProgressControllerProvider
           argument: null,
           retry: null,
           name: r'progressControllerProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -34,7 +34,7 @@ final class ProgressControllerProvider
 }
 
 String _$progressControllerHash() =>
-    r'57bc45d51ba639491f6b893a3bb368554c261eaf';
+    r'f0ffb11ae0f2bc6e3ae83ea8aa7823ce2099f2bf';
 
 abstract class _$ProgressController extends $AsyncNotifier<ConversionState> {
   FutureOr<ConversionState> build();

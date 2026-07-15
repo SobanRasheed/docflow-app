@@ -3,6 +3,10 @@ import 'package:hive_ce/hive_ce.dart';
 import '../models/conversion_history_item.dart';
 
 class HistoryService {
+  HistoryService._();
+  static final HistoryService _instance = HistoryService._();
+  factory HistoryService() => _instance;
+
   Box<ConversionHistoryItem>? _box;
 
   Future<void> init() async {

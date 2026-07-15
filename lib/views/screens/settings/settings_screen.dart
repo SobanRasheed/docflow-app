@@ -47,7 +47,7 @@ class SettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.info_outline),
                   title: const Text('Version'),
-                  trailing: const Text('1.0.0'),
+                  trailing: const Text('2.1.0'),
                 ),
                 Divider(height: 1, color: AppColors.slate200),
                 ListTile(
