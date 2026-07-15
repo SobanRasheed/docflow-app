@@ -14,7 +14,7 @@ class DoneState {
   final ToolType? tool;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class DoneController extends AsyncNotifier<DoneState> {
   @override
   Future<DoneState> build() async => const DoneState();

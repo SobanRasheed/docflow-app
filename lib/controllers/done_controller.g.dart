@@ -20,7 +20,7 @@ final class DoneControllerProvider
           argument: null,
           retry: null,
           name: r'doneControllerProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -33,7 +33,7 @@ final class DoneControllerProvider
   DoneController create() => DoneController();
 }
 
-String _$doneControllerHash() => r'5fb1964c29d44bc53f06eaf46e063b0a363c5a23';
+String _$doneControllerHash() => r'fb0f73adca7f8319aab8e7f74baf9a36b1037ee0';
 
 abstract class _$DoneController extends $AsyncNotifier<DoneState> {
   FutureOr<DoneState> build();
