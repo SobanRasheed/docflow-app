@@ -15,15 +15,15 @@ class DoneState {
 }
 
 @Riverpod(keepAlive: true)
-class DoneController extends AsyncNotifier<DoneState> {
+class DoneController extends _$DoneController {
   @override
-  Future<DoneState> build() async => const DoneState();
+  DoneState build() => const DoneState();
 
   void setResult(File result, ToolType tool) {
-    state = AsyncData(DoneState(result: result, tool: tool));
+    state = DoneState(result: result, tool: tool);
   }
 
   void reset() {
-    state = const AsyncData(DoneState());
+    state = const DoneState();
   }
 }

@@ -15,13 +15,13 @@ class DoneScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final doneState = ref.watch(doneControllerProvider).value;
+    final doneState = ref.watch(doneControllerProvider);
 
-    if (doneState?.result == null) {
+    if (doneState.result == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final result = doneState!.result!;
+    final result = doneState.result!;
     final tool = doneState.tool!;
 
     return Scaffold(

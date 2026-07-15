@@ -13,7 +13,7 @@ part of 'done_controller.dart';
 final doneControllerProvider = DoneControllerProvider._();
 
 final class DoneControllerProvider
-    extends $AsyncNotifierProvider<DoneController, DoneState> {
+    extends $NotifierProvider<DoneController, DoneState> {
   DoneControllerProvider._()
       : super(
           from: null,
@@ -31,21 +31,26 @@ final class DoneControllerProvider
   @$internal
   @override
   DoneController create() => DoneController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DoneState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DoneState>(value),
+    );
+  }
 }
 
-String _$doneControllerHash() => r'fb0f73adca7f8319aab8e7f74baf9a36b1037ee0';
+String _$doneControllerHash() => r'9e0acafead4525eb4c4199c4bc1c519d9f0737cf';
 
-abstract class _$DoneController extends $AsyncNotifier<DoneState> {
-  FutureOr<DoneState> build();
+abstract class _$DoneController extends $Notifier<DoneState> {
+  DoneState build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<DoneState>, DoneState>;
+    final ref = this.ref as $Ref<DoneState, DoneState>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<DoneState>, DoneState>,
-        AsyncValue<DoneState>,
-        Object?,
-        Object?>;
+        AnyNotifier<DoneState, DoneState>, DoneState, Object?, Object?>;
     element.handleCreate(ref, build);
   }
 }
